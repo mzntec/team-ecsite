@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+
+<link href="/css/reset.css" th:href="@{/css/reset.css}" rel="stylesheet" />
+<link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet" />
+
+<title>マイラーメン～私が選ぶ、私だけのラーメン～</title>
+</head>
+<body>
+
+<header th:insert="fragments/page_header::pageHeader"></header>
+
+<script>
+$(() => {
+	$('button.cartButton').on('click', buy);
+})
+
+let buy = (event) => {
+	let targetDiv =  $(event.target).parent();
+	let DivList = $(targetDiv).find('input');
+	let data = {
+		"productId": $( DivList[1]).val(),
+		"productCount": $( DivList[0]).val(),
+	};
+	if ( $( DivList[0]).val()== 0) {
+		alert('個数が0です。');
+	} else {
+	
+	$.ajax({
+	type: 'POST',
+	url: '/brown/cart/add',
+	data: JSON.stringify(data),
+	contentType: 'application/json',
+	scriptCharset: 'utf-8'
+	})
+		.then((result)=> {
+		if(result) {
+			window.location.href = "/brown/cart/";
+		}
+		},()=>{
+			alert('Error: ajax connection failed.');
+		})
+	}
+};
+</script>
+
+<main>
+
+	<div class="container" th:each="productDetail:${product}" th:object="${productDetail}">
+		<table class="top">
+			<caption><label th:text="*{productName} + '(' + *{productNameKana} + ')' "></label></caption>
+			<tr>
+				<th>画像</th><th>価格</th><th>発売元</th><th>発売年月日</th>
+			</tr>
+			<tr>
+				<td class="imageDetail">
+				<img class="itemImageDetail" th:src="*{imageFullPath}" alt="" />
+				</td>
+				<td class="number" th:text="*{price} + '円'"> </td>
+				<td th:text="*{releaseCompany}"></td>
+				<td th:text="*{releaseDate}"></td>
+			</tr>
+		</table>
+		<label id="description">商品説明</label>
+		<textarea cols="75" rows="5" readonly th:text="*{productDescription}">
+		</textarea>
+		
+		<hr />
+		
+		<div class="buttonArea">
+			<label>購入個数</label>
+			<input type="number" class="count number" min="0" value="0"/>
+			<input type="hidden" class="Id" value="0" th:value="*{id}"/>
+			<button class="cartButton" >カートに追加</button>
+		</div>
+	</div>
+
+</main>
+</body>
+</html>

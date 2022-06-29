@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.co.internous.brown.model.mapper.MstProductMapper">
+	<select id="findAll"  resultType="jp.co.internous.brown.model.domain.MstProduct">
+		SELECT * FROM mst_product
+	</select>
+	<select id="findByCategoryId"  resultType="jp.co.internous.brown.model.domain.MstProduct">
+		SELECT * FROM mst_product WHERE category_id =#{categoryId}
+	</select>
+	<select id="findByItemName"  resultType="jp.co.internous.brown.model.domain.MstProduct">
+		SELECT * FROM mst_product WHERE 
+		<foreach collection="keywords" item="keyword" open="(" close=")" index="i" separator="" >
+     		 <choose>
+      			  <when test="i == 0">
+        		    (product_name LIKE '%${keyword}%')
+     			   </when>
+			        <otherwise>
+			            OR (product_name LIKE '%${keyword}%')
+			        </otherwise>
+    		  </choose>
+		  </foreach>
+	</select>
+	<select id="findByCategoryIdAndItemName"  resultType="jp.co.internous.brown.model.domain.MstProduct">
+		SELECT * FROM mst_product WHERE category_id =#{categoryId} AND 
+		<foreach collection="keywords" item="keyword" open="(" close=")" index="i" separator="" >
+     		 <choose>
+      			  <when test="i == 0">
+        		    (product_name LIKE '%${keyword}%')
+     			   </when>
+			        <otherwise>
+			            OR (product_name LIKE '%${keyword}%')
+			        </otherwise>
+    		  </choose>
+		  </foreach>
+	</select>
+	
+	<select id="findByProductId"  resultType="jp.co.internous.brown.model.domain.MstProduct">
+		SELECT * FROM mst_product WHERE id=#{productId}
+	</select>
+	
+</mapper>

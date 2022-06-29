@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+
+<link href="/css/reset.css" th:href="@{/css/reset.css}" rel="stylesheet" />
+<link href="/css/style.css" th:href="@{/css/style.css}" rel="stylesheet" />
+
+<title>マイラーメン～私が選ぶ、私だけのラーメン～</title>
+</head>
+<body>
+
+<header th:insert="fragments/page_header::pageHeader"></header>
+
+<script>
+$(() => {
+	$('button.cartButton').on('click', buy);
+})
+
+let buy = (event) => {
+	let targetTr = $(event.target).parent().parent();
+	let tdList = $(targetTr).find('td');
+	let data = {
+		"productId": $(tdList[4]).find('input').val(),
+		"productCount": $(tdList[3]).find('input').val(),
+	};
+	
+	if ($(tdList[3]).find('input').val()== 0) {
+		alert('個数が0です。');
+	} else {
+	
+		$.ajax({
+			type: 'POST',
+			url: '/brown/cart/add',
+			data: JSON.stringify(data),
+			contentType: 'application/json',
+			scriptCharset: 'utf-8'
+		})
+		.then((result)=> {
+			if(result) {
+				window.location.href = "/brown/cart/";
+			}
+		},()=>{
+			alert('Error: ajax connection failed.');
+		})
+	}
+};
+
+</script>
+
+<main>
+	
+	<div class="container">
+		<form action="/brown/searchItem" method="post">
+			カテゴリ
+			<select name="categoryId" id="category">
+				<option value="0"></option>
+				<option th:each="category:${categories}" th:object="${category}" th:value="*{id}" th:text="*{categoryName}" th:selected="${SearchForm} != null ? *{id} == ${SearchForm.categoryId} : false"></option>
+			</select>
+			商品名（部分一致）
+			<input type="text" name="itemName" th:value="${SearchForm} != null ? ${SearchForm.itemName} : '' " />
+			<button class="searchButton" type="submit">検索</button>
+		</form>
+		
+		<div class="noData" th:if=" ${products.isEmpty()}">
+			<p class="info">検索結果はありません。</p>
+		</div>
+		
+		<table class="top" th:if="${!products.isEmpty()}">
+			<tr>
+				<th>画像</th><th>商品名</th><th>価格(円)</th><th>個数</th><th>カート</th>
+			</tr>
+			
+			<tr th:each="product:${products}" th:object="${product}">
+				<td class="image">
+					<a href="/brown/product" th:href="@{/brown/product/{id}(id=*{id})}"><img class="itemImage" th:src="*{imageFullPath}" alt="" /></a>
+				</td>
+				<td><a href="/brown/product" th:href="@{/brown/product/{id}(id=*{id})}" th:text="*{productName}"></a></td>
+				<td class="number" th:text="*{price}"></td>
+				<td class="componentTd"><input type="number" class="count number" min="0" value="0"/></td>
+				<td class="componentTd" hidden><input type="hidden" class="Id" value="0" th:value="*{id}"/>
+				<td class="componentTd"><button class="cartButton">追加</button></td> 
+			</tr>
+			
+		</table>
+	
+	</div>
+</main>
+</body>
+</html>
